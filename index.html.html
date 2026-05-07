@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#4A6741;--sage-l:#EAF0E8;--sage-m:#C5D9C2;
+  --clay:#C17F5A;--clay-l:#F5EDE5;
+  --ink:#1C2226;--wb:#FAF8F5;--bd:#E2DDD8;
+  --tm:#2A3238;--ts:#5A6570;--tl:#8A9299;
+  --s1c:#3B6FA0;--s1b:#E8F0F8;
+  --s2c:#7B5EA7;--s2b:#F0EBF8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--wb);color:var(--tm);min-height:100vh;}
+.hdr{background:var(--ink);padding:1rem 1.75rem;display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.hdr-t{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--wb);}
+.hdr-s{font-size:.7rem;color:#8A9299;letter-spacing:.05em;text-transform:uppercase;margin-top:2px;}
+.hdr-d{font-size:.78rem;color:#8A9299;}
+.nav{background:white;border-bottom:1px solid var(--bd);padding:0 1.75rem;display:flex;overflow-x:auto;position:sticky;top:0;z-index:200;}
+.ntab{padding:.75rem .9rem;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--tl);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.ntab.active{color:var(--sage);border-bottom-color:var(--sage);}
+.main{max-width:1120px;margin:0 auto;padding:1.5rem 1.75rem;}
+.tv{display:none;}.tv.on{display:block;}
+.st{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--ink);margin-bottom:.25rem;}
+.ss{font-size:.78rem;color:var(--tl);margin-bottom:1rem;line-height:1.5;}
+.div{border:none;border-top:1px solid var(--bd);margin:1.5rem 0;}
+.nb{background:var(--sage-l);border-left:3px solid var(--sage);padding:8px 12px;font-size:.78rem;color:var(--ts);line-height:1.6;margin-bottom:1rem;}
+.nb b{color:var(--tm);}
+
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal{background:white;border-radius:10px;padding:1.25rem;min-width:280px;max-width:380px;width:92%;}
+.modal h3{font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:.75rem;color:var(--ink);}
+.modal label{font-size:.73rem;font-weight:500;color:var(--ts);display:block;margin-bottom:3px;margin-top:.5rem;}
+.modal input,.modal select{width:100%;padding:6px 9px;border:1px solid var(--bd);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.85rem;margin-bottom:.5rem;outline:none;}
+.modal input:focus,.modal select:focus{border-color:var(--sage);}
+.mbrow{display:flex;gap:8px;justify-content:flex-end;margin-top:.75rem;}
+.mbtn{padding:6px 14px;border-radius:5px;font-size:.8rem;cursor:pointer;border:1px solid var(--bd);background:white;color:var(--ts);}
+.mbtn.primary{background:var(--sage);color:white;border-color:var(--sage);}
+
+/* CALENDAR */
+.year-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.ynbtn{padding:4px 12px;border-radius:20px;border:1px solid var(--bd);background:white;font-size:.73rem;font-weight:500;cursor:pointer;color:var(--ts);}
+.ynbtn.active{background:var(--ink);color:white;border-color:var(--ink);}
+.yview{display:none;}.yview.on{display:block;}
+.cal-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.7rem;}
+.leg{display:flex;align-items:center;gap:4px;font-size:.65rem;color:var(--ts);}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.cfrow{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.75rem;}
+.cfbtn{padding:3px 9px;border-radius:20px;border:1px solid var(--bd);background:white;font-size:.7rem;font-weight:500;cursor:pointer;color:var(--ts);}
+.cfbtn.active{background:var(--ink);color:white;border-color:var(--ink);}
+.mo-t{font-family:'DM Serif Display',serif;font-size:1rem;color:#3D4F5C;margin:1rem 0 .35rem;display:flex;align-items:center;gap:.75rem;}
+.sem-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:20px;letter-spacing:.03em;}
+.sb-s1sum{background:#FFF8E1;color:#E65100;}
+.sb-s1fall{background:#FCE4EC;color:#880E4F;}
+.sb-s1spr{background:#E8EAF6;color:#283593;}
+.sb-s2{background:var(--s2b);color:var(--s2c);}
+.sb-break{background:#F1F8E9;color:#33691E;}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1rem;}
+.cdh{font-size:.65rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--tl);text-align:center;padding:4px 0;}
+.cday{background:white;border:1px solid var(--bd);border-radius:4px;min-height:82px;padding:3px;position:relative;}
+.cday.mt{background:transparent;border-color:transparent;}
+.cday.td{border-color:#C17F5A;border-width:2px;}
+.cday.wk{background:#F0ECF8;}
+.cday.cl{background:#FFF0F5;}
+.cday.aw{background:#FFFBEA;}
+.cday.vac{background:#E8F5E9;}
+.cday:not(.mt):hover .dadd{opacity:1;}
+.dnum{font-size:.68rem;font-weight:600;color:var(--ts);display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+.cday.td .dnum{color:#C17F5A;}
+.dadd{font-size:.55rem;background:var(--sage);color:white;border:none;border-radius:2px;padding:1px 4px;cursor:pointer;opacity:0;transition:opacity .15s;}
+.ev{font-size:.59rem;padding:1px 3px;border-radius:2px;margin-bottom:1px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.ev.rem{cursor:pointer;}.ev.rem:hover{opacity:.7;}
+.ev-wk{background:#E8E0F5;color:#5B2D8C;}
+.ev-cl{background:#FFE0EE;color:#A0235A;}
+.ev-s1{background:var(--s1b);color:var(--s1c);}
+.ev-s2{background:var(--s2b);color:var(--s2c);}
+.ev-s2f{background:var(--s2c);color:white;font-weight:700;}
+.ev-cl2{background:#E8F4FD;color:#1A6FA0;}
+.ev-rs{background:var(--sage-l);color:var(--sage);font-weight:700;}
+.ev-co{background:#FFF8E8;color:#8B6914;}
+.ev-g{background:#EEF5E8;color:#3D6B35;}
+.ev-lf{background:#E8F5F0;color:#2D7A5E;}
+.ev-bx{background:#F5EDE5;color:#8B5A35;}
+.ev-mw{background:#EAF2E8;color:#3D6B35;}
+.ev-fm{background:#FFF0EA;color:#C17F5A;}
+.ev-rm{background:#EEE8F5;color:#6B45A0;}
+.ev-vac{background:#C8E6C9;color:#1B5E20;font-weight:700;}
+.ev-sem{background:#FFF3E0;color:#BF360C;font-weight:700;}
+.ev-bday{background:#FCE4EC;color:#880E4F;font-weight:700;}
+.ev-custom{background:#E0F4FF;color:#1A5276;}
+.ev-todo{background:#FFF0EA;color:#8B4513;}
+.ev-goal{background:#E8F8E8;color:#1A5E1A;}
+
+/* BIRTHDAYS */
+.bday-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem;}
+.bday-item{display:flex;align-items:center;gap:10px;background:white;border:1px solid var(--bd);border-radius:8px;padding:9px 12px;}
+.bday-cake{font-size:1.1rem;}
+.bday-name{flex:1;font-size:.9rem;font-weight:500;color:var(--tm);}
+.bday-date{font-size:.78rem;color:var(--ts);}
+.bday-del{font-size:.9rem;color:var(--tl);cursor:pointer;padding:0 3px;}
+.bday-del:hover{color:#A0235A;}
+.bday-add-form{background:white;border:1px solid var(--bd);border-radius:10px;padding:1.1rem;}
+.bday-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+.bf-group{display:flex;flex-direction:column;gap:3px;}
+.bf-label{font-size:.72rem;font-weight:500;color:var(--ts);}
+.bf-in{padding:7px 10px;border:1px solid var(--bd);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--tm);outline:none;}
+.bf-in:focus{border-color:var(--sage);}
+.bf-btn{padding:7px 14px;border:none;border-radius:5px;background:var(--sage);color:white;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;align-self:flex-end;}
+
+/* TODO */
+.tlayout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+@media(max-width:680px){.tlayout{grid-template-columns:1fr;}}
+.tcard{background:white;border:1px solid var(--bd);border-radius:10px;padding:1.1rem;}
+.tcard-t{font-size:.67rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tl);margin-bottom:.3rem;}
+.tcard-s{font-size:.77rem;color:var(--tl);margin-bottom:.8rem;line-height:1.5;}
+.t3slots{display:flex;flex-direction:column;gap:5px;margin-bottom:.75rem;}
+.t3s{display:flex;align-items:baseline;gap:7px;background:var(--wb);border:1px solid var(--bd);border-radius:5px;padding:6px 9px;}
+.t3n{font-size:.67rem;font-weight:700;color:#C17F5A;min-width:10px;}
+.t3i{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--tm);outline:none;}
+.arow{display:flex;gap:5px;margin-bottom:.65rem;}
+.ai{flex:1;padding:6px 9px;border:1px solid var(--bd);border-radius:5px;background:var(--wb);font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--tm);outline:none;}
+.ai:focus{border-color:var(--sage);}
+.asel{padding:6px 7px;border:1px solid var(--bd);border-radius:5px;background:var(--wb);font-family:'DM Sans',sans-serif;font-size:.77rem;color:var(--ts);outline:none;cursor:pointer;}
+.abtn{padding:6px 11px;border:none;border-radius:5px;background:var(--sage);color:white;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tlist{display:flex;flex-direction:column;gap:3px;min-height:20px;}
+.titem{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--bd);border-radius:5px;background:white;}
+.titem.done{opacity:.4;}.titem.done .titext{text-decoration:line-through;}
+.tchk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bd);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tchk.on{background:var(--sage);border-color:var(--sage);}
+.tchk svg{display:none;}.tchk.on svg{display:block;}
+.titext{flex:1;font-size:.82rem;color:var(--tm);}
+.titag{font-size:.62rem;padding:1px 6px;border-radius:20px;font-weight:600;flex-shrink:0;}
+.tag-free{background:var(--sage-l);color:var(--sage);}
+.tag-school{background:var(--s1b);color:var(--s1c);}
+.tag-home{background:var(--clay-l);color:#C17F5A;}
+.tag-any{background:#E8EDF0;color:#3D4F5C;}
+.tag-spouse{background:#FFF0EA;color:#C17F5A;}
+.tag-daily{background:#F5F0FF;color:#5B2D8C;}
+.ticalbtn{font-size:.6rem;background:none;border:1px solid var(--bd);border-radius:3px;padding:1px 5px;cursor:pointer;color:var(--tl);flex-shrink:0;}
+.ticalbtn:hover{border-color:var(--sage);color:var(--sage);}
+.tidel{font-size:.9rem;color:var(--tl);cursor:pointer;padding:0 2px;}
+.clrbtn{font-size:.7rem;padding:3px 9px;border:1px solid var(--bd);border-radius:20px;background:white;color:var(--tl);cursor:pointer;margin-top:.4rem;}
+
+/* GOALS */
+.anav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.875rem;}
+.abtn2{padding:4px 12px;border-radius:20px;border:1.5px solid var(--bd);background:white;font-size:.77rem;font-weight:500;cursor:pointer;color:var(--ts);}
+.abtn2.active{background:var(--ink);color:white;border-color:var(--ink);}
+.av{display:none;}.av.on{display:block;}
+.hnav{display:flex;gap:4px;margin-bottom:.8rem;}
+.hbtn{padding:3px 10px;border-radius:20px;border:1px solid var(--bd);background:white;font-size:.7rem;cursor:pointer;color:var(--ts);}
+.hbtn.active{background:#E8EDF0;color:#3D4F5C;font-weight:600;}
+.hv{display:none;}.hv.on{display:block;}
+.gcard{background:white;border:1px solid var(--bd);border-radius:10px;padding:.95rem 1.1rem;margin-bottom:8px;}
+.gtop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:5px;}
+.gtitle{font-size:.9rem;font-weight:600;color:var(--ink);line-height:1.4;flex:1;outline:none;}
+.gtitle:focus{border-bottom:1px dashed var(--bd);}
+.gwhy{font-size:.77rem;color:var(--ts);line-height:1.55;margin-bottom:6px;outline:none;}
+.gwhy:focus{border-bottom:1px dashed var(--bd);}
+.gnext-list{display:flex;flex-direction:column;gap:4px;}
+.gni{display:flex;align-items:center;gap:5px;background:var(--sage-l);border-radius:4px;padding:5px 8px;}
+.ns-lbl{font-size:.6rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--sage);flex-shrink:0;}
+.ns-text{flex:1;font-size:.76rem;color:var(--tm);outline:none;}
+.ns-text:focus{border-bottom:1px dashed var(--sage-m);}
+.ns-cal{font-size:.58rem;background:none;border:1px solid var(--sage-m);border-radius:3px;padding:1px 4px;cursor:pointer;color:var(--sage);flex-shrink:0;}
+.ns-cal:hover{background:var(--sage);color:white;}
+.ns-done{font-size:.58rem;background:none;border:1px solid var(--sage-m);border-radius:3px;padding:1px 4px;cursor:pointer;color:var(--sage);flex-shrink:0;}
+.ns-done.ck{background:var(--sage);color:white;}
+.ns-del{font-size:.82rem;color:var(--tl);cursor:pointer;padding:0 2px;flex-shrink:0;}
+.add-ns-row{display:flex;gap:5px;margin-top:5px;}
+.add-ns-in{flex:1;padding:4px 8px;border:1px dashed var(--bd);border-radius:4px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.76rem;color:var(--tm);outline:none;}
+.add-ns-in:focus{border-color:var(--sage);}
+.add-ns-btn{padding:3px 9px;border:none;border-radius:4px;background:var(--sage);color:white;font-size:.72rem;cursor:pointer;}
+.gbrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.gdbtn{font-size:.63rem;padding:2px 8px;border-radius:20px;border:1px solid var(--bd);background:white;cursor:pointer;color:var(--tl);}
+.gdbtn.done{background:var(--sage-l);color:var(--sage);border-color:var(--sage-m);}
+.gdel{font-size:.63rem;padding:2px 8px;border-radius:20px;border:1px solid var(--bd);background:white;cursor:pointer;color:#A0235A;}
+.ag-panel{background:white;border:1px solid var(--bd);border-radius:10px;padding:1.1rem;margin-top:1.25rem;}
+.agl{font-size:.7rem;font-weight:500;color:var(--ts);margin-bottom:3px;display:block;}
+.agf{width:100%;padding:6px 9px;border:1px solid var(--bd);border-radius:5px;background:var(--wb);font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--tm);margin-bottom:8px;outline:none;}
+.agf:focus{border-color:var(--sage);}
+.agrow{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.agadd{padding:6px 14px;border:none;border-radius:5px;background:var(--sage);color:white;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;}
+
+/* CHORES */
+.ptabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem;}
+.pbtn{padding:4px 12px;border-radius:20px;border:1.5px solid var(--bd);background:white;font-size:.77rem;font-weight:500;cursor:pointer;color:var(--ts);}
+.pbtn.active{background:var(--ink);color:white;border-color:var(--ink);}
+.pv{display:none;}.pv.on{display:block;}
+.csect{font-size:.67rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);padding:6px 0 3px;border-bottom:1px solid var(--bd);margin:10px 0 6px;}
+.crow{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #F5F3F0;}
+.crow:last-of-type{border-bottom:none;}
+.crow.done .crtext{text-decoration:line-through;color:var(--tl);}
+.crchk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bd);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.crchk.on{background:#C17F5A;border-color:#C17F5A;}
+.crchk svg{display:none;}.crchk.on svg{display:block;}
+.crtext{flex:1;font-size:.82rem;color:var(--tm);line-height:1.4;}
+.crwhen{font-size:.67rem;color:var(--tl);min-width:90px;text-align:right;flex-shrink:0;}
+.rsbtn{font-size:.7rem;padding:4px 11px;border:1px solid var(--bd);border-radius:20px;background:white;color:var(--tl);cursor:pointer;margin-top:.75rem;}
+
+/* SCHEDULE */
+.dtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:9px;}
+.dtcard{background:white;border:1px solid var(--bd);border-radius:10px;padding:.95rem;}
+.dtlbl{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem;padding-bottom:4px;border-bottom:2px solid;}
+.dt-wk .dtlbl{color:#B85C38;border-color:#F8EDE8;}
+.dt-cl .dtlbl{color:#5A7A5A;border-color:#EAF2EA;}
+.dt-mn .dtlbl{color:var(--s1c);border-color:var(--s1b);}
+.dt-fr .dtlbl{color:var(--sage);border-color:var(--sage-l);}
+.dt-su .dtlbl{color:#3D4F5C;border-color:#E8EDF0;}
+.dtblock{display:flex;gap:7px;margin-bottom:4px;font-size:.76rem;}
+.dttime{color:var(--tl);min-width:60px;flex-shrink:0;font-size:.69rem;}
+.dttask{color:var(--tm);line-height:1.4;}
+
+/* AUDIO */
+.cocard{background:white;border:1px solid var(--bd);border-radius:10px;padding:1rem;margin-bottom:8px;}
+.cotype{font-size:.65rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#C17F5A;margin-bottom:3px;}
+.couse{font-size:.88rem;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.cowhy{font-size:.76rem;color:var(--ts);line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div><div class="hdr-t">Command Center</div><div class="hdr-s">Schedule · Tasks · Goals · Chores · Audio · Birthdays</div></div>
+  <div class="hdr-d" id="hdate"></div>
+</div>
+<nav class="nav">
+  <button class="ntab active" onclick="nt('cal',this)">Calendar</button>
+  <button class="ntab" onclick="nt('sched',this)">Daily Schedule</button>
+  <button class="ntab" onclick="nt('todo',this)">To-Do</button>
+  <button class="ntab" onclick="nt('goals',this)">Goals</button>
+  <button class="ntab" onclick="nt('chores',this)">Chores</button>
+  <button class="ntab" onclick="nt('audio',this)">Audio</button>
+  <button class="ntab" onclick="nt('bdays',this)">Birthdays 🎂</button>
+</nav>
+
+<!-- ADD TO CALENDAR MODAL -->
+<div class="modal-ov" id="cal-modal">
+  <div class="modal">
+    <h3 id="modal-title">Add to calendar</h3>
+    <div id="modal-item-lbl" style="font-size:.79rem;color:var(--ts);margin-bottom:.75rem;font-style:italic;"></div>
+    <div id="modal-custom-wrap" style="display:none;">
+      <label>Event name</label>
+      <input id="modal-custom-text" type="text" placeholder="Event name...">
+    </div>
+    <label>Year</label>
+    <select id="modal-year" onchange="populateModalMonths()">
+      <option value="2026">2026</option>
+      <option value="2027">2027</option>
+    </select>
+    <label>Month</label>
+    <select id="modal-month" onchange="populateModalDays()"></select>
+    <label>Day</label>
+    <select id="modal-day"></select>
+    <div class="mbrow">
+      <button class="mbtn" onclick="closeModal()">Cancel</button>
+      <button class="mbtn primary" onclick="confirmAddToCal()">Add to calendar</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══ CALENDAR ══ -->
+<div id="tab-cal" class="tv on">
+  <div class="st">Full year calendar — May 2026 → May 2027</div>
+  <div class="ss">Week starts Monday. Tap + on any day to add an event. Custom events can be removed by clicking them.</div>
+  <div class="cal-legend">
+    <div class="leg"><div class="ld" style="background:#5B2D8C;opacity:.4"></div>Work day</div>
+    <div class="leg"><div class="ld" style="background:#A0235A;opacity:.4"></div>Clinical</div>
+    <div class="leg"><div class="ld" style="background:#C8B400;opacity:.4"></div>Daughter away</div>
+    <div class="leg"><div class="ld" style="background:#C8E6C9"></div>Vacation</div>
+    <div class="leg"><div class="ld" style="background:var(--s1c)"></div>S1 block</div>
+    <div class="leg"><div class="ld" style="background:var(--s2c)"></div>S2 block</div>
+    <div class="leg"><div class="ld" style="background:#1A6FA0"></div>Class</div>
+    <div class="leg"><div class="ld" style="background:var(--sage)"></div>Reset ✓</div>
+    <div class="leg"><div class="ld" style="background:#2D7A5E"></div>Lift</div>
+    <div class="leg"><div class="ld" style="background:#880E4F"></div>Birthday 🎂</div>
+    <div class="leg"><div class="ld" style="background:#1A5276"></div>Custom</div>
+  </div>
+  <div class="cfrow">
+    <button class="cfbtn active" onclick="fc('all',this)">All</button>
+    <button class="cfbtn" onclick="fc('work',this)">Work</button>
+    <button class="cfbtn" onclick="fc('school',this)">School</button>
+    <button class="cfbtn" onclick="fc('proj',this)">Projects</button>
+    <button class="cfbtn" onclick="fc('self',this)">Self</button>
+    <button class="cfbtn" onclick="fc('fam',this)">Family</button>
+    <button class="cfbtn" onclick="fc('custom',this)">Custom</button>
+  </div>
+  <div class="year-nav">
+    <button class="ynbtn active" onclick="showYear('2026',this)">2026</button>
+    <button class="ynbtn" onclick="showYear('2027',this)">2027</button>
+  </div>
+  <div id="yr-2026" class="yview on" id="cal-months-2026"></div>
+  <div id="yr-2027" class="yview" id="cal-months-2027"></div>
+</div>
+
+<!-- ══ DAILY SCHEDULE ══ -->
+<div id="tab-sched" class="tv">
+  <div class="st">Daily schedule by day type</div>
+  <div class="ss">Week starts Monday. Schedule changes by semester — see semester badge on each day type.</div>
+  <div class="nb"><b>Core rule:</b> Work days are protected. Clinical days: one productive hour post-dinner. Mondays: highest-leverage day. Free days: where your life gets built. Sunday = family/spouse time + reset.</div>
+  <div class="dtgrid">
+    <div class="dtcard dt-wk">
+      <div class="dtlbl">Work day — 5am–9:15pm</div>
+      <div class="dtblock"><span class="dttime">4:15am</span><span class="dttask">Wake, coffee, dress — no phone</span></div>
+      <div class="dtblock"><span class="dttime">5:00am</span><span class="dttask">Depart — news out / audiobook home</span></div>
+      <div class="dtblock"><span class="dttime">Work</span><span class="dttask">Full focus. No other obligations.</span></div>
+      <div class="dtblock"><span class="dttime">9:15pm</span><span class="dttask">Re-entry buffer — 15 min decom</span></div>
+      <div class="dtblock"><span class="dttime">9:45pm</span><span class="dttask">Top 3 for tomorrow. Lights out 10pm.</span></div>
+    </div>
+    <div class="dtcard dt-cl">
+      <div class="dtlbl">Clinical day (varies by semester)</div>
+      <div class="dtblock"><span class="dttime">5:00am</span><span class="dttask">Wake, coffee, review cases</span></div>
+      <div class="dtblock"><span class="dttime">Summer</span><span class="dttask">S1 AM block Wed only (before clinical). Clinical = Wed+Thu.</span></div>
+      <div class="dtblock"><span class="dttime">Fall</span><span class="dttask">Clinical = Mon+Tue+Wed daytime. Class = Wed evening.</span></div>
+      <div class="dtblock"><span class="dttime">Spring</span><span class="dttask">Clinical = Tue+Fri+Sat. Class = Mon evening.</span></div>
+      <div class="dtblock"><span class="dttime">Eve</span><span class="dttask">Log hours + documentation. 60 min max.</span></div>
+      <div class="dtblock"><span class="dttime">8:30pm</span><span class="dttask">Wind down. Top 3. No screens after 9.</span></div>
+    </div>
+    <div class="dtcard dt-mn">
+      <div class="dtlbl">Monday (summer: free + class)</div>
+      <div class="dtblock"><span class="dttime">5:30am</span><span class="dttask">Slow morning, intention</span></div>
+      <div class="dtblock"><span class="dttime">6:15am</span><span class="dttask">Animals + land check</span></div>
+      <div class="dtblock"><span class="dttime">7:00am</span><span class="dttask">S1 work block — 2–3 hrs</span></div>
+      <div class="dtblock"><span class="dttime">9:00am</span><span class="dttask">Lift (30–45 min)</span></div>
+      <div class="dtblock"><span class="dttime">10:00am</span><span class="dttask">Case study / S2 work</span></div>
+      <div class="dtblock"><span class="dttime">2:00pm</span><span class="dttask">Daughter time / rest</span></div>
+      <div class="dtblock"><span class="dttime">Eve</span><span class="dttask">Evening class (summer) / class varies by semester</span></div>
+    </div>
+    <div class="dtcard dt-fr">
+      <div class="dtlbl">Free day — Tue/Fri/Sat</div>
+      <div class="dtblock"><span class="dttime">5:30am</span><span class="dttask">Slow morning. Planner check.</span></div>
+      <div class="dtblock"><span class="dttime">6:30am</span><span class="dttask">Animals + land (20–30 min)</span></div>
+      <div class="dtblock"><span class="dttime">7:00am</span><span class="dttask">S2 work or 1 basement box</span></div>
+      <div class="dtblock"><span class="dttime">9:00am</span><span class="dttask">Lift (30–45 min)</span></div>
+      <div class="dtblock"><span class="dttime">10:00am</span><span class="dttask">Home/garden project or case study</span></div>
+      <div class="dtblock"><span class="dttime">12:30pm</span><span class="dttask">Rest / downtime</span></div>
+      <div class="dtblock"><span class="dttime">2:00pm</span><span class="dttask">Family time</span></div>
+    </div>
+    <div class="dtcard dt-su">
+      <div class="dtlbl">Sunday — reset + family</div>
+      <div class="dtblock"><span class="dttime">AM</span><span class="dttask">Sunday reset (20 min)</span></div>
+      <div class="dtblock"><span class="dttime">Morning</span><span class="dttask">Meal prep / food shop if needed</span></div>
+      <div class="dtblock"><span class="dttime">Afternoon</span><span class="dttask">Family / daughter / rest</span></div>
+      <div class="dtblock"><span class="dttime">5pm+</span><span class="dttask">Spouse/marriage time — NO school after 5pm</span></div>
+    </div>
+  </div>
+  <div class="div"></div>
+  <div class="st" style="margin-bottom:.25rem;">Sunday reset — 20 min</div>
+  <div class="ss">Every Sunday before 5pm. Confirm S2 submission (while active). No school after 5pm.</div>
+  <div style="display:flex;flex-direction:column;gap:7px;">
+    <div class="cocard"><div class="cotype">Step 1</div><div class="couse">Open semester chrono doc</div><div class="cowhy">What is due in the next 3 weeks? Write anything needing prep into this week's planner now.</div></div>
+    <div class="cocard"><div class="cotype">Step 2</div><div class="couse">Fill fridge weekly section</div><div class="cowhy">Assign recurring tasks to days. Don't over-schedule.</div></div>
+    <div class="cocard"><div class="cotype">Step 3</div><div class="couse">Check family calendar</div><div class="cowhy">Anything needing coordination with spouse or daughter this week?</div></div>
+    <div class="cocard"><div class="cotype">Step 4</div><div class="couse">Set one project focus for the week</div><div class="cowhy">One thing beyond daily tasks. Write it on the fridge blank sheet.</div></div>
+    <div class="cocard"><div class="cotype">Step 5</div><div class="couse">Write shopping list + dog food check</div><div class="cowhy">Meal plan, household needs, garden supplies. Check if dog food batch is due this week.</div></div>
+  </div>
+</div>
+
+<!-- ══ TO-DO ══ -->
+<div id="tab-todo" class="tv">
+  <div class="st">To-do system</div>
+  <div class="ss">Capture everything in master → pull 5–10 to weekly shortlist every Sunday → pick top 3 the night before. Tap 📅 to add any item to the calendar.</div>
+  <div class="tlayout">
+    <div>
+      <div class="tcard" style="margin-bottom:1.1rem;">
+        <div class="tcard-t">Tomorrow's top 3</div>
+        <div class="tcard-s">Write in planner each night. 3 things that make tomorrow a success.</div>
+        <div class="t3slots">
+          <div class="t3s"><span class="t3n">1</span><input class="t3i" type="text" placeholder="Most important..."></div>
+          <div class="t3s"><span class="t3n">2</span><input class="t3i" type="text" placeholder="Second..."></div>
+          <div class="t3s"><span class="t3n">3</span><input class="t3i" type="text" placeholder="Third..."></div>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-t">This week's shortlist</div>
+        <div class="tcard-s">5–10 items max. Tagged by day type.</div>
+        <div class="arow">
+          <input class="ai" id="wk-in" type="text" placeholder="Add to this week..." onkeydown="if(event.key==='Enter')addTodo('wk')">
+          <select class="asel" id="wk-tag"><option value="any">Any</option><option value="free">Free</option><option value="school">School</option><option value="home">Home</option><option value="daily">Daily</option><option value="spouse">Spouse</option></select>
+          <button class="abtn" onclick="addTodo('wk')">+</button>
+        </div>
+        <div class="tlist" id="wk-list"></div>
+        <button class="clrbtn" onclick="clrDone('wk-list')">Clear completed</button>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-t">Master capture list</div>
+      <div class="tcard-s">Everything lands here first. Scan every Sunday reset and promote items to the weekly shortlist.</div>
+      <div class="arow">
+        <input class="ai" id="ml-in" type="text" placeholder="Capture anything..." onkeydown="if(event.key==='Enter')addTodo('ml')">
+        <select class="asel" id="ml-tag"><option value="any">Any</option><option value="free">Free</option><option value="school">School</option><option value="home">Home</option><option value="daily">Daily</option><option value="spouse">Spouse</option></select>
+        <button class="abtn" onclick="addTodo('ml')">Capture</button>
+      </div>
+      <div class="tlist" id="ml-list"></div>
+      <button class="clrbtn" onclick="clrDone('ml-list')">Clear completed</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GOALS ══ -->
+<div id="tab-goals" class="tv">
+  <div class="st">Goals + next steps</div>
+  <div class="ss">Tap any goal title or "why" to edit inline. Add, complete, or remove next steps. Tap 📅 to schedule a next step on the calendar.</div>
+  <div class="anav">
+    <button class="abtn2 active" onclick="sa('self',this)">Self</button>
+    <button class="abtn2" onclick="sa('family',this)">Family</button>
+    <button class="abtn2" onclick="sa('home',this)">Home</button>
+    <button class="abtn2" onclick="sa('career',this)">Career</button>
+    <button class="abtn2" onclick="sa('land',this)">Land / Garden</button>
+  </div>
+  <div id="ga-self" class="av on"></div>
+  <div id="ga-family" class="av"></div>
+  <div id="ga-home" class="av"></div>
+  <div id="ga-career" class="av"></div>
+  <div id="ga-land" class="av"></div>
+  <div class="div"></div>
+  <div class="ag-panel">
+    <div style="font-size:.67rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tl);margin-bottom:.8rem;">Add a new goal</div>
+    <label class="agl">Goal title</label><input class="agf" id="ag-goal" type="text" placeholder="What do you want to achieve?">
+    <label class="agl">Why it matters</label><input class="agf" id="ag-why" type="text" placeholder="Why does this matter?">
+    <label class="agl">First next step</label><input class="agf" id="ag-next" type="text" placeholder="The very next physical action...">
+    <div class="agrow">
+      <select class="agf" id="ag-area" style="margin:0;width:auto;"><option value="self">Self</option><option value="family">Family</option><option value="home">Home</option><option value="career">Career</option><option value="land">Land/Garden</option></select>
+      <select class="agf" id="ag-hz" style="margin:0;width:auto;"><option value="st">This semester</option><option value="mt">This year</option><option value="lt">3–5 years</option></select>
+      <button class="agadd" onclick="addGoal()">Add goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHORES ══ -->
+<div id="tab-chores" class="tv">
+  <div class="st">Chore chart</div>
+  <div class="ss">Tap to check off. Reset clears the week.</div>
+  <div class="ptabs">
+    <button class="pbtn active" onclick="sp('you',this)">You</button>
+    <button class="pbtn" onclick="sp('spouse',this)">Spouse</button>
+    <button class="pbtn" onclick="sp('daughter',this)">Daughter</button>
+    <button class="pbtn" onclick="sp('shared',this)">Shared / Seasonal</button>
+  </div>
+  <div id="pv-you" class="pv on"></div>
+  <div id="pv-spouse" class="pv"></div>
+  <div id="pv-daughter" class="pv"></div>
+  <div id="pv-shared" class="pv"></div>
+</div>
+
+<!-- ══ AUDIO ══ -->
+<div id="tab-audio" class="tv">
+  <div class="st">Audio / commute plan</div>
+  <div class="ss">Queue content the night before — no decisions at 5am.</div>
+  <div class="cocard"><div class="cotype">Work — out (5am)</div><div class="couse">News briefing (20–30 min), then audiobook or silence</div><div class="cowhy">5am is not a deep learning window. Keep it low-stakes.</div></div>
+  <div class="cocard"><div class="cotype">Work — home (7–9pm)</div><div class="couse">Audiobook (fiction or non-school), music, or silence</div><div class="cowhy">12–16 hr day behind you. This is recovery time. Protect your nervous system.</div></div>
+  <div class="cocard"><div class="cotype">Clinical — out (varies by semester)</div><div class="couse">School audio: lecture recordings, case review, NP podcasts</div><div class="cowhy">Primes your brain for the clinical environment ahead.</div></div>
+  <div class="cocard"><div class="cotype">Clinical — home</div><div class="couse">First 20 min: music or silence. Then light school audio if energy allows.</div><div class="cowhy">Clinical drains. Give yourself a decompression buffer first.</div></div>
+  <div class="cocard"><div class="cotype">S2 readings (while active)</div><div class="couse">Text-to-speech on assigned readings — Tue or Thu commute</div><div class="cowhy">Use Natural Reader or Voice Dream on PDFs.</div></div>
+  <div class="div"></div>
+  <div class="st" style="margin-bottom:.25rem;">Content queue</div>
+  <div class="cocard"><div class="cotype">School 1 — clinical prep</div><div class="couse">NPCultivated, NP Student Podcast, Hippocrates Café</div><div class="cowhy">APRN-specific. Use on clinical commute out.</div></div>
+  <div class="cocard"><div class="cotype">School 2 — readings</div><div class="couse">Natural Reader, Voice Dream — convert PDFs to audio</div><div class="cowhy">Listen before writing. Reduces active desk time.</div></div>
+  <div class="cocard"><div class="cotype">Homestead + garden</div><div class="couse">Practical Permaculture, Urban Farm Podcast</div><div class="cowhy">Connects planning to your land. Use on errand runs.</div></div>
+  <div class="cocard"><div class="cotype">Decompression</div><div class="couse">Audiobooks — fiction or non-school nonfiction</div><div class="cowhy">Keep a separate queue from school content.</div></div>
+  <div class="cocard"><div class="cotype">News</div><div class="couse">NYT The Daily, NPR Up First — 20–30 min max</div><div class="cowhy">Cap it then move to something restorative or educational.</div></div>
+</div>
+
+<!-- ══ BIRTHDAYS ══ -->
+<div id="tab-bdays" class="tv">
+  <div class="st">Birthdays 🎂</div>
+  <div class="ss">Birthdays automatically appear on the calendar with a 🎂 emoji every year. Add as many as you like.</div>
+  <div class="bday-list" id="bday-list">
+    <div class="bday-item" style="color:var(--tl);font-size:.82rem;font-style:italic;">No birthdays added yet. Add one below!</div>
+  </div>
+  <div class="div"></div>
+  <div class="bday-add-form">
+    <div style="font-size:.67rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tl);margin-bottom:.9rem;">Add a birthday</div>
+    <div class="bday-row">
+      <div class="bf-group">
+        <span class="bf-label">Name</span>
+        <input class="bf-in" id="bd-name" type="text" placeholder="Name..." style="width:160px;">
+      </div>
+      <div class="bf-group">
+        <span class="bf-label">Month</span>
+        <select class="bf-in" id="bd-month" style="width:120px;">
+          <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+          <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+          <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+          <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+        </select>
+      </div>
+      <div class="bf-group">
+        <span class="bf-label">Day</span>
+        <select class="bf-in" id="bd-day" style="width:80px;"></select>
+      </div>
+      <button class="bf-btn" onclick="addBirthday()">Add 🎂</button>
+    </div>
+  </div>
+</div>
+</div><!-- /main -->
+
+<script>
+// ── UTILITIES ──
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MNF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MNS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dow(y,m,d){return new Date(y,m,d).getDay();}
+function monOffset(y,m){const d=new Date(y,m,1).getDay();return d===0?6:d-1;}
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function kk(y,m,d){return `${y}-${m}-${d}`;}
+
+// Date header
+const now=new Date();
+document.getElementById('hdate').textContent=DN[now.getDay()]+', '+MNF[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+
+// ── NAV ──
+function nt(id,btn){
+  document.querySelectorAll('.tv').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('on');btn.classList.add('active');
+}
+function showYear(yr,btn){
+  document.querySelectorAll('.yview').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.ynbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('yr-'+yr).classList.add('on');btn.classList.add('active');
+}
+
+// ── CALENDAR DATA ──
+const TCAL=new Date(2026,4,6); // today = May 6 2026
+
+// Known work days through Jun 12 (verified by script)
+const WS=new Set(['2026-4-8','2026-4-9','2026-4-10','2026-4-15','2026-4-22','2026-4-24','2026-4-29','2026-5-6','2026-5-7','2026-5-11','2026-5-12']);
+
+// S1 Summer: May 18 - Aug 10 2026. Class=Mon eve. Clinical=Wed+Thu.
+// S1 Fall: Aug 31 - Dec 14 2026. Class=Wed eve. Clinical=Mon+Tue+Wed daytime.
+// S1 Spring: Jan 18 - May 6 2027. Class=Mon eve. Clinical=Tue+Fri+Sat.
+const S1SUM_S=new Date(2026,4,18), S1SUM_E=new Date(2026,7,10);
+const S1FAL_S=new Date(2026,7,31), S1FAL_E=new Date(2026,11,14);
+const S1SPR_S=new Date(2027,0,18), S1SPR_E=new Date(2027,4,6);
+
+// S2: Q1 ends Jun 19. Q2: Jul 6 - Sep 20. Q3: Oct 5 - Dec 20. Q4: Jan 4 - Mar 21 2027. Q5: Apr 5 - Jun 20 2027.
+const S2Q1_E=new Date(2026,5,19);
+const S2Q2_S=new Date(2026,6,6),  S2Q2_E=new Date(2026,8,20);
+const S2Q3_S=new Date(2026,9,5),  S2Q3_E=new Date(2026,11,20);
+const S2Q4_S=new Date(2027,0,4),  S2Q4_E=new Date(2027,2,21);
+const S2Q5_S=new Date(2027,3,5),  S2Q5_E=new Date(2027,5,20);
+
+// Vacation: Jul 21-28 2026
+const VAC_S=new Date(2026,6,21), VAC_E=new Date(2026,6,28);
+
+// Daughter away school year (every other Fri-Sun)
+// Known: May 8-10, May 22-24, Jun 5-7, Jun 19-21
+// Summer: Mon-Mon alternating from Jun 29
+// School year from Sep 4: every other Fri-Sun
+const awaySet=new Set();
+// May/Jun school year weekends
+[[2026,4,8],[2026,4,9],[2026,4,10],[2026,4,22],[2026,4,23],[2026,4,24],
+ [2026,5,5],[2026,5,6],[2026,5,7],[2026,5,19],[2026,5,20],[2026,5,21]].forEach(([y,m,d])=>awaySet.add(kk(y,m,d)));
+// Summer Mon-Mon blocks (Jun 29-Jul 6, Jul 13-20, Jul 27-Aug 3, Aug 10-17)
+function addAwayRange(start,end){
+  let d=new Date(start);
+  while(d<=end){awaySet.add(kk(d.getFullYear(),d.getMonth(),d.getDate()));d.setDate(d.getDate()+1);}
+}
+addAwayRange(new Date(2026,5,29),new Date(2026,6,6));
+addAwayRange(new Date(2026,6,13),new Date(2026,6,20));
+addAwayRange(new Date(2026,6,27),new Date(2026,7,3));
+addAwayRange(new Date(2026,7,10),new Date(2026,7,17));
+// Fall school year every-other Fri-Sun from Sep 4
+let fri=new Date(2026,8,4);
+for(let i=0;i<12;i++){
+  let f=new Date(fri.getTime()+i*14*24*60*60*1000);
+  let s=new Date(f.getTime()+24*60*60*1000);
+  let su=new Date(f.getTime()+2*24*60*60*1000);
+  [f,s,su].forEach(dt=>awaySet.add(kk(dt.getFullYear(),dt.getMonth(),dt.getDate())));
+}
+
+// Birthdays (populated dynamically)
+const birthdays=[]; // {name, month(0-based), day}
+
+// Custom calendar events
+const customEvs={};
+function addCustomEv(y,m,d,text,type='custom'){
+  const k=kk(y,m,d);
+  if(!customEvs[k])customEvs[k]=[];
+  customEvs[k].push({text,type});
+  // Rebuild the relevant month
+  rebuildMonthInDOM(y,m);
+}
+
+// ── CALENDAR LOGIC ──
+const CM={wk:'work',cl:'school',s1:'school',s2:'school',s2f:'school',cl2:'school',co:'school',
+  rs:'self',g:'proj',lf:'self',bx:'proj',mw:'proj',fm:'fam',aw:'fam',rm:'proj',
+  vac:'fam',sem:'school',bday:'fam',custom:'custom',todo:'custom',goal:'custom'};
+const CL={wk:'ev-wk',cl:'ev-cl',s1:'ev-s1',s2:'ev-s2',s2f:'ev-s2f',cl2:'ev-cl2',co:'ev-co',
+  rs:'ev-rs',g:'ev-g',lf:'ev-lf',bx:'ev-bx',mw:'ev-mw',fm:'ev-fm',aw:'ev-aw',rm:'ev-rm',
+  vac:'ev-vac',sem:'ev-sem',bday:'ev-bday',custom:'ev-custom',todo:'ev-todo',goal:'ev-goal'};
+
+function isW(y,m,d){return WS.has(kk(y,m,d));}
+function isInRange(y,m,d,s,e){const dt=new Date(y,m,d);return dt>=s&&dt<=e;}
+function isVac(y,m,d){return isInRange(y,m,d,VAC_S,VAC_E);}
+function isAway(y,m,d){return awaySet.has(kk(y,m,d));}
+
+// S1 schedule functions
+function isS1SumClin(y,m,d){
+  if(!isInRange(y,m,d,S1SUM_S,S1SUM_E))return false;
+  if(isW(y,m,d))return false;
+  const w=dow(y,m,d);return w===3||w===4; // Wed or Thu
+}
+function isS1SumClass(y,m,d){
+  if(!isInRange(y,m,d,S1SUM_S,S1SUM_E))return false;
+  if(isW(y,m,d))return false;
+  return dow(y,m,d)===1; // Mon
+}
+function isS1FalClin(y,m,d){
+  if(!isInRange(y,m,d,S1FAL_S,S1FAL_E))return false;
+  const w=dow(y,m,d);return w===1||w===2||w===3; // Mon+Tue+Wed
+}
+function isS1FalClass(y,m,d){
+  if(!isInRange(y,m,d,S1FAL_S,S1FAL_E))return false;
+  return dow(y,m,d)===3; // Wed evening (after clinical daytime)
+}
+function isS1SprClin(y,m,d){
+  if(!isInRange(y,m,d,S1SPR_S,S1SPR_E))return false;
+  const w=dow(y,m,d);return w===2||w===5||w===6; // Tue+Fri+Sat
+}
+function isS1SprClass(y,m,d){
+  if(!isInRange(y,m,d,S1SPR_S,S1SPR_E))return false;
+  return dow(y,m,d)===1; // Mon
+}
+function isS2Active(y,m,d){
+  const dt=new Date(y,m,d);
+  return (dt<=S2Q1_E)||(dt>=S2Q2_S&&dt<=S2Q2_E)||(dt>=S2Q3_S&&dt<=S2Q3_E)||(dt>=S2Q4_S&&dt<=S2Q4_E)||(dt>=S2Q5_S&&dt<=S2Q5_E);
+}
+function isS2Due(y,m,d){return dow(y,m,d)===0&&isS2Active(y,m,d)&&new Date(y,m,d)<=S2Q1_E;}
+// S2 Q2+ due Sundays
+function isS2DueQ2plus(y,m,d){
+  const dt=new Date(y,m,d);
+  return dow(y,m,d)===0&&((dt>=S2Q2_S&&dt<=S2Q2_E)||(dt>=S2Q3_S&&dt<=S2Q3_E)||(dt>=S2Q4_S&&dt<=S2Q4_E)||(dt>=S2Q5_S&&dt<=S2Q5_E));
+}
+function isSunReset(y,m,d){return dow(y,m,d)===0&&!isW(y,m,d);}
+// Lift: Mon+Fri+Sat that are free (not work, not clinical heavy days)
+function isLift(y,m,d){
+  if(isW(y,m,d))return false;
+  const w=dow(y,m,d);
+  if(isS1FalClin(y,m,d))return false; // fall clinical Mon
+  return w===1||w===5||w===6;
+}
+// Semester start/end markers
+function isSemMarker(y,m,d){
+  return kk(y,m,d)===kk(2026,4,18)||kk(y,m,d)===kk(2026,7,10)||
+         kk(y,m,d)===kk(2026,7,31)||kk(y,m,d)===kk(2026,11,14)||
+         kk(y,m,d)===kk(2027,0,18)||kk(y,m,d)===kk(2027,4,6);
+}
+function semMarkerLabel(y,m,d){
+  const k2=kk(y,m,d);
+  if(k2===kk(2026,4,18))return 'S1 Summer start';
+  if(k2===kk(2026,7,10))return 'S1 Summer end';
+  if(k2===kk(2026,7,31))return 'S1 Fall start';
+  if(k2===kk(2026,11,14))return 'S1 Fall end';
+  if(k2===kk(2027,0,18))return 'S1 Spring start';
+  if(k2===kk(2027,4,6))return 'S1 Spring end';
+  return '';
+}
+
+// Manual project events (verified free days, May-Jun only)
+const PEV={
+  '2026-4-2':[['Garden: site+cardboard','g'],['1 box','bx']],
+  '2026-4-5':[['1 box','bx']],
+  '2026-4-11':[['Food shop','bx']],
+  '2026-4-12':[['Garden: layers','g'],['1 box','bx']],
+  '2026-4-16':[['Daughter time','fm']],
+  '2026-4-18':[['Food shop','bx']],
+  '2026-4-19':[['1 box','bx'],['Garden: settle','g']],
+  '2026-4-23':[['Donation run','bx']],
+  '2026-4-25':[['Food shop','bx']],
+  '2026-4-26':[['1 box','bx'],['Garden: seedlings','g']],
+  '2026-4-28':[['Mow H2','mw']],
+  '2026-4-30':[['Daughter time','fm']],
+  '2026-5-1':[['Food shop','bx']],
+  '2026-5-2':[['1 box','bx'],['Bedroom: swatches','rm']],
+  '2026-5-8':[['Food shop','bx']],
+  '2026-5-9':[['1 box','bx'],['Garden: plant herbs','g']],
+  '2026-5-13':[['Mow H2','mw'],['Daughter time','fm']],
+  '2026-5-15':[['Food shop','bx']],
+  '2026-5-16':[['1 box','bx'],['Bedroom: clear','rm']],
+  '2026-5-22':[['Food shop','bx']],
+  '2026-5-23':[['1 box','bx'],['Garden: tend','g']],
+  '2026-5-25':[['Bedroom: PAINT','rm']],
+  '2026-5-26':[['Spouse eve','fm'],['Mow H2','mw']],
+  '2026-5-27':[['Daughter time','fm']],
+  '2026-5-29':[['Food shop','bx']],
+};
+
+function mkEv(t,c,p,removable=false){
+  const e=document.createElement('span');
+  e.className='ev '+CL[c]+(removable?' rem':'');
+  e.textContent=t;e.dataset.cat=CM[c]||'o';
+  if(removable){e.title='Click to remove';e.onclick=()=>e.remove();}
+  p.appendChild(e);
+}
+
+function buildDay(y,m,d,container){
+  const k=kk(y,m,d);
+  const work=isW(y,m,d),away=isAway(y,m,d),vac=isVac(y,m,d);
+  const s1sumClin=isS1SumClin(y,m,d),s1sumClass=isS1SumClass(y,m,d);
+  const s1falClin=isS1FalClin(y,m,d),s1falClass=isS1FalClass(y,m,d);
+  const s1sprClin=isS1SprClin(y,m,d),s1sprClass=isS1SprClass(y,m,d);
+  const anyClin=s1sumClin||s1falClin||s1sprClin;
+  const isTd=new Date(y,m,d).toDateString()===TCAL.toDateString();
+
+  let cls='cday';
+  if(isTd)cls+=' td';
+  // Tint priority: work=purple (highest) > vacation=green > clinical=pink > daughter-away=yellow (lowest)
+  if(work)cls+=' wk';
+  else if(vac)cls+=' vac';
+  else if(anyClin)cls+=' cl';
+  else if(away)cls+=' aw';
+  const cell=document.createElement('div');cell.className=cls;
+
+  const dn=document.createElement('div');dn.className='dnum';
+  const dspan=document.createElement('span');dspan.textContent=d;
+  if(away&&!work&&!vac&&!anyClin){const s=document.createElement('span');s.style.cssText='color:#7A6500;font-size:.5rem;margin-left:2px;';s.textContent='●';dspan.appendChild(s);}
+  const dadd=document.createElement('button');dadd.className='dadd';dadd.textContent='+';
+  dadd.onclick=e=>{e.stopPropagation();openModalDirect(y,m,d);};
+  dn.appendChild(dspan);dn.appendChild(dadd);cell.appendChild(dn);
+
+  // Semester markers
+  if(isSemMarker(y,m,d))mkEv(semMarkerLabel(y,m,d),'sem',cell);
+  // Vacation
+  if(vac)mkEv('🌴 Vacation','vac',cell);
+  // Work
+  if(work){mkEv('Work','wk',cell);mkEv('Commute','co',cell);}
+  // S1 Summer
+  if(s1sumClass&&!work)mkEv('S1 AM + Class eve','s1',cell);
+  if(s1sumClin&&!work){if(dow(y,m,d)===3)mkEv('S1 AM','s1',cell);mkEv('Clinical','cl',cell);mkEv('Commute: school','co',cell);}
+  // S1 Fall
+  if(s1falClin&&!work){
+    mkEv('Clinical (Fall)','cl',cell);
+    if(s1falClass)mkEv('Class eve (Fall)','cl2',cell);
+    else mkEv('Commute: school','co',cell);
+  }
+  // S1 Spring
+  if(s1sprClass&&!work)mkEv('S1 Class+S1 AM','s1',cell);
+  if(s1sprClin&&!work){mkEv('Clinical (Spr)','cl',cell);mkEv('Commute: school','co',cell);}
+  // S2
+  if(isS2Due(y,m,d))mkEv('S2 hw due','s2',cell);
+  if(isS2DueQ2plus(y,m,d))mkEv('S2 due','s2',cell);
+  if(new Date(y,m,d).toDateString()===new Date(2026,5,19).toDateString())mkEv('S2 Q1 FINAL','s2f',cell);
+  // Sunday reset (last column = Sunday)
+  if(isSunReset(y,m,d))mkEv('Sunday reset ✓','rs',cell);
+  // Lift
+  if(isLift(y,m,d))mkEv('Lift 🏋','lf',cell);
+  // Daughter away label
+  if(away&&!work)mkEv('Daughter away','aw',cell);
+  // Project events (May+Jun only)
+  if(PEV[k])PEV[k].forEach(([t,c])=>mkEv(t,c,cell));
+  // Birthdays
+  birthdays.forEach(b=>{
+    if(b.month===m&&b.day===d)mkEv('🎂 '+b.name,'bday',cell);
+  });
+  // Custom events
+  if(customEvs[k])customEvs[k].forEach(ce=>mkEv(ce.text,ce.type,cell,true));
+
+  container.appendChild(cell);
+}
+
+// Semester badge helper
+function semBadge(y,m){
+  const first=new Date(y,m,1),last=new Date(y,m+1,0);
+  const badges=[];
+  if(first<=S1SUM_E&&last>=S1SUM_S)badges.push('<span class="sem-badge sb-s1sum">S1 Summer</span>');
+  if(first<=S1FAL_E&&last>=S1FAL_S)badges.push('<span class="sem-badge sb-s1fall">S1 Fall</span>');
+  if(first<=S1SPR_E&&last>=S1SPR_S)badges.push('<span class="sem-badge sb-s1spr">S1 Spring</span>');
+  if(first<=S2Q1_E)badges.push('<span class="sem-badge sb-s2">S2 Q1</span>');
+  if(first<=S2Q2_E&&last>=S2Q2_S)badges.push('<span class="sem-badge sb-s2">S2 Q2</span>');
+  if(first<=S2Q3_E&&last>=S2Q3_S)badges.push('<span class="sem-badge sb-s2">S2 Q3</span>');
+  if(first<=S2Q4_E&&last>=S2Q4_S)badges.push('<span class="sem-badge sb-s2">S2 Q4</span>');
+  if(first<=S2Q5_E&&last>=S2Q5_S)badges.push('<span class="sem-badge sb-s2">S2 Q5</span>');
+  return badges.join(' ');
+}
+
+// monthGrids stores {year, month, gridId} for rebuild
+const monthGrids=[];
+
+function buildCalendar(){
+  const months2026=[[2026,4],[2026,5],[2026,6],[2026,7],[2026,8],[2026,9],[2026,10],[2026,11]];
+  const months2027=[[2027,0],[2027,1],[2027,2],[2027,3],[2027,4]];
+  buildYearSection(months2026,'yr-2026');
+  buildYearSection(months2027,'yr-2027');
+}
+
+function buildYearSection(months,containerId){
+  const container=document.getElementById(containerId);
+  months.forEach(([y,m])=>{
+    const gridId=`grid-${y}-${m}`;
+    const titleDiv=document.createElement('div');titleDiv.className='mo-t';
+    titleDiv.innerHTML=`${MNF[m]} ${y} ${semBadge(y,m)}`;
+    container.appendChild(titleDiv);
+    const grid=document.createElement('div');grid.className='cgrid';grid.id=gridId;
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(dh=>{
+      const h=document.createElement('div');h.className='cdh';h.textContent=dh;grid.appendChild(h);
+    });
+    const offset=monOffset(y,m);
+    const nd=daysInMonth(y,m);
+    for(let i=0;i<offset;i++){const e=document.createElement('div');e.className='cday mt';grid.appendChild(e);}
+    for(let d=1;d<=nd;d++)buildDay(y,m,d,grid);
+    container.appendChild(grid);
+    monthGrids.push({y,m,gridId});
+  });
+}
+
+function rebuildMonthInDOM(ty,tm){
+  const entry=monthGrids.find(mg=>mg.y===ty&&mg.m===tm);
+  if(!entry)return;
+  const grid=document.getElementById(entry.gridId);
+  // Keep headers, remove day cells
+  const kids=Array.from(grid.children);
+  kids.slice(7).forEach(k=>k.remove());
+  const offset=monOffset(ty,tm);
+  const nd=daysInMonth(ty,tm);
+  for(let i=0;i<offset;i++){const e=document.createElement('div');e.className='cday mt';grid.appendChild(e);}
+  for(let d=1;d<=nd;d++)buildDay(ty,tm,d,grid);
+}
+
+buildCalendar();
+
+function fc(type,btn){
+  document.querySelectorAll('.cfbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.ev').forEach(ev=>{ev.style.display=(type==='all'||ev.dataset.cat===type)?'':'none';});
+}
+
+// ── MODAL ──
+let _mText='',_mType='custom',_mDirect=false;
+function openModal(text,type='custom'){
+  _mText=text;_mType=type;_mDirect=false;
+  document.getElementById('modal-title').textContent='Add to calendar';
+  document.getElementById('modal-item-lbl').textContent='"'+text+'"';
+  document.getElementById('modal-custom-wrap').style.display='none';
+  document.getElementById('modal-year').value='2026';
+  populateModalMonths();
+  document.getElementById('cal-modal').classList.add('open');
+}
+function openModalDirect(y,m,d){
+  _mDirect=true;_mType='custom';_mText='';
+  document.getElementById('modal-title').textContent='Add event to '+d+' '+MNS[m]+' '+y;
+  document.getElementById('modal-item-lbl').textContent='';
+  document.getElementById('modal-custom-wrap').style.display='block';
+  document.getElementById('modal-custom-text').value='';
+  document.getElementById('modal-year').value=y;
+  populateModalMonths();
+  document.getElementById('modal-month').value=m;
+  populateModalDays();
+  document.getElementById('modal-day').value=d;
+  document.getElementById('cal-modal').classList.add('open');
+}
+function populateModalMonths(){
+  const yr=parseInt(document.getElementById('modal-year').value);
+  const sel=document.getElementById('modal-month');sel.innerHTML='';
+  const start=yr===2026?4:0,end=yr===2026?11:4;
+  for(let m=start;m<=end;m++){
+    const o=document.createElement('option');o.value=m;o.textContent=MNF[m];sel.appendChild(o);
+  }
+  populateModalDays();
+}
+function populateModalDays(){
+  const yr=parseInt(document.getElementById('modal-year').value);
+  const mo=parseInt(document.getElementById('modal-month').value);
+  const sel=document.getElementById('modal-day');sel.innerHTML='';
+  const nd=daysInMonth(yr,mo);
+  for(let i=1;i<=nd;i++){const o=document.createElement('option');o.value=i;o.textContent=i;sel.appendChild(o);}
+}
+document.getElementById('modal-year').addEventListener('change',populateModalMonths);
+document.getElementById('modal-month').addEventListener('change',populateModalDays);
+function closeModal(){document.getElementById('cal-modal').classList.remove('open');}
+function confirmAddToCal(){
+  const y=parseInt(document.getElementById('modal-year').value);
+  const m=parseInt(document.getElementById('modal-month').value);
+  const d=parseInt(document.getElementById('modal-day').value);
+  let text=_mText;
+  if(_mDirect){
+    const inp=document.getElementById('modal-custom-text');
+    text=inp.value.trim();
+    if(!text){alert('Please enter an event name.');return;}
+  }
+  addCustomEv(y,m,d,text,_mType==='custom'?'custom':_mType);
+  closeModal();
+}
+
+// ── BIRTHDAYS ──
+function populateBdayDays(){
+  const m=parseInt(document.getElementById('bd-month').value);
+  const sel=document.getElementById('bd-day');sel.innerHTML='';
+  const nd=new Date(2026,m+1,0).getDate();
+  for(let i=1;i<=nd;i++){const o=document.createElement('option');o.value=i;o.textContent=i;sel.appendChild(o);}
+}
+document.getElementById('bd-month').addEventListener('change',populateBdayDays);
+populateBdayDays();
+
+function addBirthday(){
+  const name=document.getElementById('bd-name').value.trim();
+  const month=parseInt(document.getElementById('bd-month').value);
+  const day=parseInt(document.getElementById('bd-day').value);
+  if(!name)return;
+  birthdays.push({name,month,day});
+  renderBdayList();
+  // Rebuild any month that contains this birthday
+  monthGrids.forEach(mg=>{if(mg.m===month)rebuildMonthInDOM(mg.y,mg.m);});
+  document.getElementById('bd-name').value='';
+}
+function renderBdayList(){
+  const list=document.getElementById('bday-list');list.innerHTML='';
+  if(birthdays.length===0){list.innerHTML='<div style="color:var(--tl);font-size:.82rem;font-style:italic;padding:8px 0;">No birthdays added yet.</div>';return;}
+  birthdays.forEach((b,i)=>{
+    const div=document.createElement('div');div.className='bday-item';
+    div.innerHTML=`<span class="bday-cake">🎂</span><span class="bday-name">${b.name}</span><span class="bday-date">${MNF[b.month]} ${b.day}</span><span class="bday-del" onclick="removeBday(${i})">×</span>`;
+    list.appendChild(div);
+  });
+}
+function removeBday(i){
+  const b=birthdays[i];
+  birthdays.splice(i,1);
+  renderBdayList();
+  monthGrids.forEach(mg=>{if(mg.m===b.month)rebuildMonthInDOM(mg.y,mg.m);});
+}
+
+// ── TODO ──
+const TL={any:'tag-any',free:'tag-free',school:'tag-school',home:'tag-home',daily:'tag-daily',spouse:'tag-spouse'};
+const TN={any:'Any',free:'Free day',school:'School',home:'Home',daily:'Daily',spouse:'Spouse'};
+function chkSvg(){return`<svg width="8" height="8" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3.5,6.5 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`;}
+function makeTodoEl(text,tag){
+  const el=document.createElement('div');el.className='titem';
+  const safe=text.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  el.innerHTML=`<div class="tchk" onclick="tc(this)">${chkSvg()}</div><span class="titext">${text}</span><span class="titag ${TL[tag]||'tag-any'}">${TN[tag]||'Any'}</span><button class="ticalbtn" onclick="openModal('${safe}','todo')">📅</button><span class="tidel" onclick="this.closest('.titem').remove()">×</span>`;
+  return el;
+}
+function addTodo(p){
+  const inp=document.getElementById(p+'-in');
+  const tag=document.getElementById(p+'-tag').value;
+  const txt=inp.value.trim();if(!txt)return;
+  document.getElementById(p+'-list').appendChild(makeTodoEl(txt,tag));inp.value='';
+}
+function tc(chk){chk.classList.toggle('on');chk.closest('.titem').classList.toggle('done');}
+function clrDone(id){document.querySelectorAll('#'+id+' .titem.done').forEach(e=>e.remove());}
+
+const initWk=[
+  ['School prep — S1 semester setup','school'],['School prep — S2 semester setup','school'],
+  ['Update semester chrono doc — both programs','school'],['Log clinical hours (after each clinical)','daily'],
+  ['Fill out FAFSA','school'],['Get transfer credits validated','school'],
+  ['Establish student/alumni association','school'],['Establish psych clinical link','school'],
+  ['Case study practice — schedule 3x/week','school'],
+  ['Count and sort basement boxes — H1','free'],['Clean out bedroom — H1','free'],
+  ['Pick herb garden site','free'],['Set up lifting space','free'],
+  ['Husband: arrange condo reno contractor','spouse'],['Dog food batch this month','home'],
+];
+const initMl=[
+  ['Source cardboard for lasagna bed','home'],['Research mowing hire — H2','any'],
+  ['Get bedroom paint swatches','home'],['Talk to daughter about social activities','any'],
+  ['Find local nursery for zone 6b herb seedlings','home'],
+  ['Print semester doc — post above desk','school'],
+  ['Set up donation bins in H1 basement','free'],['Queue NP podcasts for clinical commute','any'],
+  ['Cut up trees at H2','free'],['Husband: condo reno contractor quotes','spouse'],
+  ['Assess shed 1 + shed 2 contents — H1','free'],
+  ['Walk H1 drainage area — note scope','free'],
+  ['Clean out H2 basement — plan dedicated day','free'],
+];
+initWk.forEach(([t,tag])=>document.getElementById('wk-list').appendChild(makeTodoEl(t,tag)));
+initMl.forEach(([t,tag])=>document.getElementById('ml-list').appendChild(makeTodoEl(t,tag)));
+
+// ── GOALS ──
+const GDATA={
+  self:{
+    st:[
+      {title:'Re-establish lifting — 3x/week (Mon, Fri, Sat)',why:'Physical strength reduces stress and supports the demands of two graduate programs + clinical + long commute.',steps:['Clear lifting space this week','First session this Monday or next free day','Add lift blocks to weekly shortlist','Track sessions in planner — one line each']},
+      {title:'Protect sleep — consistent 10pm wind-down through graduation',why:'5am wake time makes sleep the single most leveraged health variable you have.',steps:['Add "wind down — no screens" as last planner line each night','Set a 9:30pm phone alarm as a cue']},
+      {title:'Complete S1 and S2 semesters strong',why:'Finishing well removes concurrent program pressure and creates breathing room.',steps:['School prep today (S1) and tomorrow (S2)','Update chrono doc for both programs','Log clinical hours same evening as each clinical','Case study practice 3x/week']},
+    ],
+    mt:[
+      {title:'Establish consistent Mediterranean eating rhythm',why:'The herb garden, meal plan, and family health all converge here.',steps:['Get herbs planted','Post meal plan inside fridge command center','Make dog food monthly — add to shopping run']},
+      {title:'Build a study system that does not bleed into family time',why:'Academic demands are temporary. Family erosion is not.',steps:['Run Sunday reset every week for 4 weeks','After 4 weeks assess what is leaking']},
+    ],
+    lt:[
+      {title:'Complete both APRN programs and sit for certification',why:'The professional north star everything is organized around.',steps:['Stay current this semester','Each semester completed is the next step']},
+      {title:'Maintain body and energy that supports a full life at 50+',why:'Lifting, eating well, sleep, the garden — all of it compounds.',steps:['Show up for lifting this week']},
+    ],
+  },
+  family:{
+    st:[
+      {title:'Husband time — weekly, minimum twice a month',why:'Marriage needs intentional investment during high-stress academic years.',steps:['Protect Sunday evenings — no school after 5pm','Plan one intentional evening or activity this week','Add "spouse date" to weekly shortlist every week']},
+      {title:'Daughter time — weekly standing activity',why:'High school years are finite. A predictable touchpoint matters more than occasional big gestures.',steps:['Ask her what she would want to do this week','Pick a day — put it on the fridge calendar as standing','Invite her to help with herb garden planting']},
+    ],
+    mt:[
+      {title:'July 21–28 vacation — fully present, no school',why:'Already scheduled. The goal is to arrive present.',steps:['Flag all deadlines in the vacation window now','Move them forward before July 18']},
+      {title:'Support daughter in finding 1–2 social or creative outlets',why:'Connection and creative expression now builds the foundation she carries into adulthood.',steps:['Ask what she is curious about','Find one concrete option — class, club, outing']},
+    ],
+    lt:[
+      {title:'A marriage that is stronger after the programs than before',why:'Graduate school is a known relationship stressor. Small investments now prevent large repairs later.',steps:['Involve spouse in Sunday reset — even 5 minutes','One intentional activity weekly']},
+    ],
+  },
+  home:{
+    st:[
+      {title:'H1 — Clear basement (1 box/week, 4-box sessions when possible)',why:'Basement is the bottleneck for the home office and mental clarity.',steps:['Count boxes this week','Set up three zones: keep / donate / trash','Open first box this week','Schedule first 4-box session on a free Saturday']},
+      {title:'H1 — Clean out and redo bedroom',why:'Your bedroom should be restorative. Clearing it makes the paint project intentional.',steps:['Purge bedroom — remove anything that does not belong','Get paint swatches after room is clear (48-hr test)','Identify old furniture to remove','Research new furniture options','Paint day — schedule on calendar','Organize and style after paint']},
+    ],
+    mt:[
+      {title:'H1 — Set up functional home office',why:'A dedicated study space with systems visible removes friction from every school session.',steps:['Identify which room','Begin clearing as basement progress creates space','Set up desk, chair, lighting first','Post semester doc on wall at eye level']},
+      {title:'H1 — Clean out and reorganize garage',why:'Organized garage enables outdoor projects and gives tools a home.',steps:['Schedule one garage session after basement habit is running (month 2+)','Inventory before buying anything']},
+      {title:'H1 — Outdoor: drainage trench + pool perimeter weed barrier',why:'Drainage compounds over time. Pool perimeter weed barrier saves ongoing maintenance hours.',steps:['Walk the drainage area and photograph scope','Get one contractor quote or research DIY approach']},
+      {title:'H1 — Clean out shed 1 and shed 2',why:'Sheds that cannot be accessed are outdoor basements.',steps:['Walk both sheds and make an inventory list','Schedule first shed session for a free Saturday']},
+      {title:'H1 — Finish shed roof',why:'Unfinished roof causes ongoing moisture damage.',steps:['Assess current state','Determine DIY or contractor','Get materials list or quote']},
+      {title:'H1 — Hire out second property mowing',why:'Your time is worth more than the cost of lawn service.',steps:['Get one quote this month']},
+      {title:'H2 — Clean out basement',why:'H2 basement needs to be usable, not a storage overflow site.',steps:['Plan a dedicated H2 day once H1 habit is running','Schedule on calendar']},
+      {title:'H2 — Cut up and clear trees',why:'Fallen trees are a hazard and block productive use of the property.',steps:['Schedule a free Saturday with the right equipment']},
+      {title:'Condo (H3) — Husband to complete renovation',why:'Unfinished renovation is an open loop costing money and mental bandwidth.',steps:['Husband: contact contractor this week','Get timeline and cost to completion']},
+    ],
+    lt:[
+      {title:'H1 — A home that feels ordered, restorative, and intentional',why:'When your home is orderly, it gives energy back.',steps:['Basement → Bedroom → Office → Garage → Outdoors']},
+      {title:'All properties — managed, intentional, not draining',why:'Three properties is significant overhead. Each should serve a clear purpose.',steps:['Condo reno complete','H2 cleared and purpose-defined','H1 fully organized']},
+    ],
+  },
+  career:{
+    st:[
+      {title:'Stay current in both programs without last-minute scrambling',why:'The commute audio, Wed AM block, and Monday block exist to prevent the scramble.',steps:['School prep today and tomorrow','Chrono doc updated for both programs','Log clinical hours same evening as clinical']},
+      {title:'Use clinical hours to build real reasoning, not just log hours',why:'The difference between competent and excellent is built in these hours.',steps:['Queue clinical case review audio for next clinical commute','Case study practice 3x/week']},
+      {title:'FAFSA and transfer credits — administrative',why:'Financial aid and credit validation directly affect program timeline and cost.',steps:['Fill out FAFSA — deadline-sensitive','Get transfer credits validated — contact registrar','Establish student/alumni association','Establish psych clinical link']},
+    ],
+    mt:[
+      {title:'Explore reducing work commute burden',why:'4 hrs commute per work day is significant drain.',steps:['After this semester evaluate schedule flexibility','Even one fewer work day per month compounds over the year']},
+    ],
+    lt:[
+      {title:'Practice as a certified APRN — closer to home',why:'The end state that justifies the current sacrifice.',steps:['Stay the course — each clinical hour is the next step']},
+    ],
+  },
+  land:{
+    st:[
+      {title:'Herb garden — zone 6b Mediterranean, no-dig lasagna method',why:'Connects your meal plan to your land. Immediate daily use. Low maintenance once established.',steps:['Pick the site this week (south-facing, close to kitchen)','Collect cardboard — free from hardware stores or neighbors','Mow or flatten site, lay wetted cardboard base (overlap 6 inches — critical)','Build alternating layers: straw → chicken manure → straw → 3–4 inches compost on top','Water thoroughly and let settle 2–3 weeks before planting','Buy seedlings: basil, thyme, oregano, parsley, sage, chives, lavender (Hidcote), lemon balm','Rosemary in a container (bring in before Oct 1 — zone 6b)','Mint in a container (spreads aggressively if planted in bed)','Plant and label herbs in the top compost layer','Add herb watering to fridge weekly section (every 2–3 days in summer)','Fall: harvest basil hard before Oct 1 — make pesto, freeze in olive oil','Fall: bring rosemary + mint containers inside before first frost','Fall: mulch perennial herbs with 4–6 inches straw for zone 6b winter']},
+    ],
+    mt:[
+      {title:'Vegetable garden — second lasagna bed',why:'Tomatoes, peppers, zucchini from your own land.',steps:['Start cardboard layer for bed 2 in August after S2 summer ends','Zone 6b: tomatoes, peppers, zucchini after May 15 next year','Fall planting: kale, broccoli, chard in late August for zone 6b']},
+      {title:'Shrub layer — fast-fruiting food forest plants',why:'Fruit in 1–3 years, zone 6b hardy. Builds food forest without waiting for trees.',steps:['Source in late summer: honeyberry (2 compatible varieties — Berry Bee + Aurora)','Nanking cherry (2 plants for better yield)','Serviceberry (Autumn Brilliance or Regent variety)','Hazelnut (2 varieties for cross-pollination)','Gumi berry (nitrogen-fixing — confirm species, not autumn olive)','Jostaberry (thornless, self-fertile, shade tolerant)','Plant locations on 1.5 acres — map canopy/understory/ground cover zones','Fall is ideal planting time in zone 6b']},
+    ],
+    lt:[
+      {title:'Food forest on 1.5 acres — canopy, shrub, ground cover',why:'A property that produces food, builds soil, supports wildlife, and requires less work each year as it matures.',steps:['Herb garden first','Shrubs this fall','First fruit tree next spring (apple, pear, or persimmon — all zone 6b)','Long term: elderberry, pawpaw, serviceberry as canopy/understory']},
+    ],
+  },
+};
+
+function makeNsItem(text){
+  const div=document.createElement('div');div.className='gni';
+  const safe=text.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  div.innerHTML=`<span class="ns-lbl">→</span><span class="ns-text" contenteditable="true">${text}</span><button class="ns-cal" onclick="openModal(this.previousElementSibling.textContent.trim(),'goal')">📅</button><button class="ns-done" onclick="this.classList.toggle('ck');this.textContent=this.classList.contains('ck')?'✓':'done'">done</button><span class="ns-del" onclick="this.closest('.gni').remove()">×</span>`;
+  return div;
+}
+function addNs(inp){
+  const txt=inp.value.trim();if(!txt)return;
+  const list=inp.closest('.gcard').querySelector('.gnext-list');
+  list.appendChild(makeNsItem(txt));inp.value='';
+}
+function makeGoalCard(goal,hz){
+  const hzLabel=hz==='st'?'This semester':hz==='mt'?'This year':'3–5 years';
+  const card=document.createElement('div');card.className='gcard';
+  card.innerHTML=`<div class="gtop"><div class="gtitle" contenteditable="true">${goal.title}</div><span style="font-size:.63rem;color:var(--tl);flex-shrink:0;">${hzLabel}</span></div><div class="gwhy" contenteditable="true">${goal.why}</div><div class="gnext-list"></div><div class="add-ns-row"><input class="add-ns-in" type="text" placeholder="Add next step..." onkeydown="if(event.key==='Enter'){addNs(this);return false;}"><button class="add-ns-btn" onclick="addNs(this.previousElementSibling)">+</button></div><div class="gbrow"><button class="gdbtn" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓ Done':'Mark done'">Mark done</button><button class="gdel" onclick="this.closest('.gcard').remove()">Remove goal</button></div>`;
+  const nl=card.querySelector('.gnext-list');
+  (goal.steps||[]).forEach(s=>nl.appendChild(makeNsItem(s)));
+  return card;
+}
+function buildGoalArea(area){
+  const el=document.getElementById('ga-'+area);
+  const data=GDATA[area];
+  const hnav=document.createElement('div');hnav.className='hnav';
+  const hvArr=[];
+  ['st','mt','lt'].forEach((hz,i)=>{
+    const btn=document.createElement('button');btn.className='hbtn'+(i===0?' active':'');
+    btn.textContent=hz==='st'?'This semester':hz==='mt'?'This year':'3–5 years';
+    const hv=document.createElement('div');hv.className='hv'+(i===0?' on':'');
+    (data[hz]||[]).forEach(g=>hv.appendChild(makeGoalCard(g,hz)));
+    hvArr.push({btn,hv});
+    btn.onclick=()=>{
+      hvArr.forEach(x=>{x.hv.classList.remove('on');x.btn.classList.remove('active');});
+      hv.classList.add('on');btn.classList.add('active');
+    };
+    hnav.appendChild(btn);
+    el.appendChild(hv);
+  });
+  el.insertBefore(hnav,el.firstChild);
+}
+['self','family','home','career','land'].forEach(buildGoalArea);
+function addGoal(){
+  const goal=document.getElementById('ag-goal').value.trim();
+  const why=document.getElementById('ag-why').value.trim();
+  const next=document.getElementById('ag-next').value.trim();
+  const area=document.getElementById('ag-area').value;
+  const hz=document.getElementById('ag-hz').value;
+  if(!goal)return;
+  const hzMap={st:0,mt:1,lt:2};
+  const hvs=document.getElementById('ga-'+area).querySelectorAll('.hv');
+  hvs[hzMap[hz]||0].appendChild(makeGoalCard({title:goal,why:why||'',steps:next?[next]:[]},hz));
+  ['ag-goal','ag-why','ag-next'].forEach(id=>document.getElementById(id).value='');
+}
+function sa(area,btn){
+  document.querySelectorAll('.av').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.abtn2').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ga-'+area).classList.add('on');btn.classList.add('active');
+}
+
+// ── CHORES ──
+function mkC(text,when){return`<div class="crow"><div class="crchk" onclick="this.classList.toggle('on');this.closest('.crow').classList.toggle('done')"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3.5,6.5 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="crtext">${text}</span><span class="crwhen">${when}</span></div>`;}
+function mkS(t){return`<div class="csect">${t}</div>`;}
+function mkR(id){return`<button class="rsbtn" onclick="document.querySelectorAll('#${id} .crchk').forEach(c=>{c.classList.remove('on');c.closest('.crow').classList.remove('done');})">Reset week</button>`;}
+
+document.getElementById('pv-you').innerHTML=`
+${mkS('Daily')}${mkC('Water house plants','Morning, 5 min')}${mkC('Herb/garden check + water','Every 2–3 days')}${mkC('Wipe countertops','Daily')}
+${mkS('Weekly')}${mkC('Sunday reset (20 min)','Sunday AM')}${mkC('Food shopping (list from Sunday reset)','Monday')}${mkC('S1 work block — logs, assignments, readings','Mon AM + Wed AM')}${mkC('S2 assignment — start Tue, finish/submit Fri (while active)','Tue–Fri')}${mkC('Log clinical hours same day as clinical','Clinical days')}${mkC('Clinical documentation (60 min max)','Clinical eves')}${mkC('Own laundry — wash, dry, put away same day','Tue or Sat')}${mkC('1 basement box (30–45 min)','Any free day')}${mkC('Lift session x3','Mon, Fri, Sat')}${mkC('Case study practice','3x/week')}${mkC('Check/sort mail','Monday')}${mkC('Meal plan + prep','Sat/Sun')}
+${mkS('Monthly')}${mkC('Make dog food batch (add to food shopping run)','Monthly')}${mkC('Donation run (when donate zone fills)','Every 4–6 wks')}${mkC('Mow second property (until hired out)','Biweekly Sat')}${mkC('Deep clean fridge','Monthly')}${mkC('Pantry cleanout','Monthly')}${mkC('Wipe windows/sills','Monthly')}${mkC('Wash garbage cans','Monthly')}${mkC('Clean coffee machine','Monthly')}
+${mkS('Quarterly')}${mkC('Dust fans','Quarterly')}${mkC('Digital declutter','Quarterly')}${mkC('Clean blinds','Quarterly')}${mkC('Wash pillows','Quarterly')}
+${mkS('Semi-annually')}${mkC('Clean outside of windows','Semi-annually')}${mkC('Clean out files','Feb/Aug')}
+${mkS('Annually')}${mkC('Clean behind hard-to-reach places','January')}${mkC('Wash and store winter items','March')}${mkC('Service gutters/furnace','November')}${mkC('Flip mattress','January')}
+${mkR('pv-you')}`;
+
+document.getElementById('pv-spouse').innerHTML=`
+${mkS('Daily')}${mkC('Feed dogs — AM + PM','Daily')}${mkC('Make bed','Daily')}
+${mkS('Weekly')}${mkC('Mow home property — H1','Weekly')}${mkC('Sort and process mail','Monday')}${mkC('Empty basement boxes — 1+ per week','Weekly')}${mkC('Food shopping (when assigned)','Rotating')}${mkC('Tidy common spaces','Daily/as needed')}${mkC('Own laundry — wash, dry, put away','Free day')}${mkC('Clean own room / shared bedroom','Weekly')}${mkC('Chicken care — feed, water, collect eggs','Daily when daughter away')}${mkC('Tend garden — water, check — on your work/clinical days','Wed/Thu/work days')}${mkC('Trash + recycling out','Night before collection')}${mkC('Dog yard cleanup','Weekly')}${mkC('Sweep/mop when needed','Weekly')}${mkC('Declutter counters','Weekly')}${mkC('Follow up on condo renovation progress','Weekly check-in')}
+${mkS('Monthly')}${mkC('Joint basement session — shared boxes','Monthly Sat AM')}${mkC('Mow second property — H2 (biweekly)','Biweekly')}${mkC('Service mower/bikes','March')}${mkC('Car maintenance check','June/as needed')}
+${mkS('Semi-annually')}${mkC('Declutter garage','Semi-annually')}${mkC('Declutter sheds','Semi-annually')}${mkC('Deep clean washer/dryer','Semi-annually')}${mkC('Clean downstairs fridge','Semi-annually')}
+${mkR('pv-spouse')}`;
+
+document.getElementById('pv-daughter').innerHTML=`
+<div class="nb">Away every other weekend (Fri–Sun) from May 8. Away every other week Mon–Mon from June 29. Tasks marked * skip on away periods.</div>
+${mkS('Daily — every day she is home')}${mkC('Make bed (before leaving room)','Morning')}${mkC('Feed chickens + collect eggs → fridge','Morning')}${mkC('Empty dishwasher (Mon–Fri)','Morning')}${mkC('After dinner: dishes, dishwasher, wipe stovetop + counters','After dinner')}${mkC('Pick up floor — nothing on floor overnight','Evening')}${mkC('Check Google Classroom daily','Evening')}${mkC('Put projects and tests on family calendar when assigned','Same day assigned')}
+${mkS('Twice a week')}${mkC('Move robot vacuum — upstairs run','2x/week')}${mkC('Move robot vacuum — downstairs run','2x/week')}
+${mkS('Weekly *')}${mkC('Own laundry — wash, dry, fold, put away (1–2x/week)','Weekly')}${mkC('Vacuum all floors','Saturday')}${mkC('Clean bedroom: vacuum, wipe desk, tidy shelves, empty bin','Saturday')}${mkC('Chicken coop spot-clean','Weekly')}
+${mkS('Every 2 weeks *')}${mkC('Wipe down bathroom thoroughly','Every other weekend when home')}${mkC('Change bed sheets — strip, wash, remake same day','Biweekly')}
+${mkS('Monthly *')}${mkC('Deep clean bedroom — thorough top to bottom','Monthly')}${mkC('Full coop clean + fresh bedding (with you)','Monthly')}${mkC('Vacuum furniture + baseboards','Monthly')}
+${mkR('pv-daughter')}`;
+
+document.getElementById('pv-shared').innerHTML=`
+${mkS('Weekly shared')}${mkC('Tidy common spaces and entryway','Monday')}${mkC('Dust all surfaces','Monday')}${mkC('Clean bathrooms — toilet, sink, mirror (rotate monthly)','Saturday')}${mkC('Sweep/mop floors','Weekly')}${mkC('Declutter counters','Weekly')}
+${mkS('Monthly')}${mkC('Deep clean kitchen — cabinets, appliances, stove','Monthly')}${mkC('Full coop clean + fresh bedding (you + daughter)','Monthly')}${mkC('Joint basement box session (you + spouse)','Monthly Sat AM')}${mkC('Empty mail organizer','Sunday')}${mkC('Declutter car','Sunday')}${mkC('Chicken hay/bedding restock','Monthly')}
+${mkS('Quarterly')}${mkC('Wash cars','Quarterly')}${mkC('Clean out linen closet and under sinks','April/Oct')}${mkC('Purge clothes','October')}
+${mkS('Semi-annually')}${mkC('Deep clean washer/dryer','Semi-annually')}${mkC('Open/close pool','May/Sept')}${mkC('Wash curtains','May')}${mkC('Deep clean kitchen appliances/stove (full)','September')}
+${mkS('Annually')}${mkC('Clean behind hard-to-reach places','January')}${mkC('Wash and store winter items','March')}${mkC('Service gutters/furnace','November')}${mkC('Flip mattress','January')}${mkC('Outdoor cleanup','As needed')}${mkC('Mow/weed whack','Weather permitting')}
+${mkR('pv-shared')}`;
+
+function sp(id,btn){
+  document.querySelectorAll('.pv').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pv-'+id).classList.add('on');btn.classList.add('active');
+}
+</script>
+</body>
+</html>
